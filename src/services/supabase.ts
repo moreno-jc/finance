@@ -1,6 +1,5 @@
-import { Database } from '@/types/database';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import Constants from 'expo-constants';
 import 'react-native-url-polyfill/auto';
 
@@ -16,11 +15,26 @@ if (!url || !key) {
     console.warn('⚠️ Faltan variables de entorno para Supabase (EXPO_PUBLIC_SUPABASE_URL o EXPO_PUBLIC_SUPABASE_ANON_KEY). Asegúrate de tener el archivo .env configurado.');
 }
 
-export const supabase = createClient<Database>(url, key, {
-    auth: {
+// Lazy initialization - evita que Supabase intente inicializarse durante el bundling
+let supabaseInstance: SupabaseClient | null = null;
+
+export const getSupabaseClient = (): SupabaseClient => {
+  if (!supabaseInstance) {
+    supabaseInstance = createClient(url, key, {
+      auth: {
         storage: AsyncStorage,
         autoRefreshToken: true,
         persistSession: true,
-        detectSessionInUrl: false,
-    },
+        detectSessionInUrl: false, // ← IMPORTANTE en React Native
+      },
+    });
+  }
+  return supabaseInstance;
+};
+
+// Export backwards compatible
+export const supabase = new Proxy({} as SupabaseClient, {
+  get: (target, prop) => {
+    return getSupabaseClient()[prop as keyof SupabaseClient];
+  },
 });

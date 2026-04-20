@@ -1,20 +1,26 @@
+import { TransactionForm } from '@/components/transactions/TransactionForm';
 import { AppHeader } from '@/components/ui/AppHeader';
 import { theme } from '@/constants/theme';
-import { StyleSheet, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function NewTransactionScreen() {
+    const insets = useSafeAreaInsets();
+    
     return (
-        <View style={styles.container}>
-            <AppHeader title="Nueva Transacción" />
-            <View style={styles.content}>
-                <Text style={styles.text}>Nueva Transacción (coming soon)</Text>
-            </View>
+        <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+            <AppHeader title="Nueva Transacción" showBackButton />
+            <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                style={styles.keyboardView}
+            >
+                <TransactionForm />
+            </KeyboardAvoidingView>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: theme.colors.background },
-    content: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-    text: { color: theme.colors.textMuted },
+    keyboardView: { flex: 1 },
 });
