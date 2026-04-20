@@ -1,13 +1,16 @@
 import { DashboardCharts } from '@/components/charts/DashboardCharts';
+import { BalanceCard } from '@/components/dashboard/BalanceCard';
+import { ComparisonCards } from '@/components/dashboard/ComparisonCards';
+import { DateHeader } from '@/components/dashboard/DateHeader';
+import { RecentTransactions } from '@/components/dashboard/RecentTransactions';
 import { AppHeader } from '@/components/ui/AppHeader';
 import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
 import { theme } from '@/constants/theme';
 import { useAuthStore } from '@/store/authStore';
 import { useTransactionStore } from '@/store/transactionStore';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 export default function DashboardScreen() {
@@ -51,18 +54,11 @@ export default function DashboardScreen() {
             >
                 {transactions.length > 0 ? (
                     <>
-                        <View style={styles.summaryGrid}>
-                            <Card style={styles.summaryCard}>
-                                <Text style={styles.summaryLabel}>Total Mes</Text>
-                                <Text style={styles.summaryValue}>
-                                    ${transactions
-                                        .filter(t => t.type === 'expense')
-                                        .reduce((acc, t) => acc + Number(t.amount), 0)
-                                        .toLocaleString()}
-                                </Text>
-                            </Card>
-                        </View>
+                        <DateHeader />
+                        <BalanceCard />
+                        <ComparisonCards />
                         <DashboardCharts />
+                        <RecentTransactions />
                     </>
                 ) : (
                     <View style={styles.welcomeContainer}>
