@@ -16,6 +16,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     plugins: [
         'expo-router',
         'expo-notifications',
+        '@react-native-community/datetimepicker',
         ...(config.plugins?.filter((p: any) => typeof p === 'string' ? p !== 'expo-router' : p[0] !== 'expo-router') || [])
     ],
     extra: {

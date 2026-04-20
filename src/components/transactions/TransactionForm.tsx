@@ -1,14 +1,17 @@
+import { CreateCategoryModal } from '@/components/transactions/CreateCategoryModal';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { CategoryIcon } from '@/components/ui/CategoryIcon';
 import { Input } from '@/components/ui/Input';
 import { theme } from '@/constants/theme';
 import { useAuthStore } from '@/store/authStore';
 import { useTransactionStore } from '@/store/transactionStore';
+import { Ionicons } from '@expo/vector-icons';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { z } from 'zod';
 
 const transactionSchema = z.object({
@@ -24,8 +27,9 @@ type TransactionFormData = z.infer<typeof transactionSchema>;
 export function TransactionForm() {
     const { user } = useAuthStore();
     const router = useRouter();
-    const { addTransaction, categories, fetchCategories, loading } = useTransactionStore();
+    const { addTransaction, addCategory, categories, fetchCategories, loading } = useTransactionStore();
     const [selectedType, setSelectedType] = useState<'income' | 'expense' | 'saving' | 'investment' | 'debt'>('expense');
+    const [showCreateCategoryModal, setShowCreateCategoryModal] = useState(false);
 
     useEffect(() => {
         if (user) {
@@ -73,93 +77,144 @@ export function TransactionForm() {
         }
     };
 
+    const handleCreateCategory = async (categoryData: { name: string; type: any; icon: string; color: string }) => {
+        if (!user) {
+            Alert.alert('Error', 'Usuario no autenticado');
+            return;
+        }
+
+        try {
+            await addCategory({
+                user_id: user.id,
+                name: categoryData.name,
+                type: categoryData.type,
+                icon: categoryData.icon,
+                color: categoryData.color,
+                is_default: false,
+            });
+
+            // Auto-select the newly created category
+            const newCategory = categories.find(
+                c => c.name === categoryData.name && c.type === categoryData.type && c.user_id === user.id
+            );
+            if (newCategory) {
+                setValue('category_id', newCategory.id);
+            }
+
+            Alert.alert('Éxito', 'Categoría creada correctamente');
+        } catch (error: any) {
+            Alert.alert('Error', error.message || 'No se pudo crear la categoría');
+        }
+    };
+
     const filteredCategories = categories.filter(c => c.type === selectedType);
 
     return (
-        <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-            <View style={styles.typeSelector}>
-                {(['expense', 'income', 'saving', 'investment', 'debt'] as const).map((type) => (
-                    <TouchableOpacity
-                        key={type}
-                        style={[
-                            styles.typeButton,
-                            selectedType === type && {
-                                backgroundColor: theme.colors.types[type],
-                                borderColor: theme.colors.types[type]
-                            }
-                        ]}
-                        onPress={() => handleTypeChange(type)}
-                    >
-                        <Text style={[
-                            styles.typeText,
-                            selectedType === type && { color: theme.colors.white }
-                        ]}>
-                            {type.charAt(0).toUpperCase() + type.slice(1)}
-                        </Text>
-                    </TouchableOpacity>
-                ))}
-            </View>
-
-            <Card style={styles.card}>
-                <Controller
-                    control={control}
-                    name="amount"
-                    render={({ field: { onChange, value } }) => (
-                        <Input
-                            label="Monto"
-                            placeholder="0.00"
-                            keyboardType="numeric"
-                            value={value}
-                            onChangeText={onChange}
-                            error={errors.amount?.message}
-                            leftIcon={<Text style={styles.currencySymbol}>$</Text>}
-                        />
-                    )}
-                />
-
-                <Controller
-                    control={control}
-                    name="description"
-                    render={({ field: { onChange, value } }) => (
-                        <Input
-                            label="Descripción"
-                            placeholder="Ej. Súper semanal"
-                            value={value}
-                            onChangeText={onChange}
-                            error={errors.description?.message}
-                        />
-                    )}
-                />
-
-                <Text style={styles.label}>Categoría</Text>
-                <View style={styles.categoriesContainer}>
-                    {filteredCategories.map((cat) => (
+        <>
+            <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+                <View style={styles.typeSelector}>
+                    {(['expense', 'income', 'saving', 'investment', 'debt'] as const).map((type) => (
                         <TouchableOpacity
-                            key={cat.id}
+                            key={type}
                             style={[
-                                styles.categoryChip,
-                                { borderColor: cat.color },
-                                selectedCategoryId === cat.id && { backgroundColor: cat.color + '20' }
+                                styles.typeButton,
+                                selectedType === type && {
+                                    backgroundColor: theme.colors.types[type],
+                                    borderColor: theme.colors.types[type]
+                                }
                             ]}
-                            onPress={() => setValue('category_id', cat.id)}
+                            onPress={() => handleTypeChange(type)}
                         >
-                            <Text style={[styles.categoryIcon, { color: cat.color }]}>{cat.icon}</Text>
-                            <Text style={[styles.categoryText, { color: cat.color }]}>{cat.name}</Text>
+                            <Text style={[
+                                styles.typeText,
+                                selectedType === type && { color: theme.colors.white }
+                            ]}>
+                                {type.charAt(0).toUpperCase() + type.slice(1)}
+                            </Text>
                         </TouchableOpacity>
                     ))}
-                    {filteredCategories.length === 0 && (
-                        <Text style={styles.emptyCategories}>Cargando categorías...</Text>
-                    )}
                 </View>
 
-                <Button
-                    label="Registrar Transacción"
-                    onPress={handleSubmit(onSubmit)}
-                    isLoading={loading}
-                    style={styles.submitButton}
-                />
-            </Card>
-        </ScrollView>
+                <Card style={styles.card}>
+                    <Controller
+                        control={control}
+                        name="amount"
+                        render={({ field: { onChange, value } }) => (
+                            <Input
+                                label="Monto"
+                                placeholder="0.00"
+                                keyboardType="numeric"
+                                value={value}
+                                onChangeText={onChange}
+                                error={errors.amount?.message}
+                                leftIcon={<Text style={styles.currencySymbol}>$</Text>}
+                            />
+                        )}
+                    />
+
+                    <Controller
+                        control={control}
+                        name="description"
+                        render={({ field: { onChange, value } }) => (
+                            <Input
+                                label="Descripción"
+                                placeholder="Ej. Súper semanal"
+                                value={value}
+                                onChangeText={onChange}
+                                error={errors.description?.message}
+                            />
+                        )}
+                    />
+
+                    <View style={styles.categoryHeader}>
+                        <Text style={styles.label}>Categoría</Text>
+                        <TouchableOpacity
+                            style={styles.addCategoryButton}
+                            onPress={() => setShowCreateCategoryModal(true)}
+                        >
+                            <Ionicons name="add-circle-outline" size={16} color={theme.colors.primary} />
+                            <Text style={styles.addCategoryText}>Nueva</Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    <View style={styles.categoriesContainer}>
+                        {filteredCategories.map((cat) => (
+                            <TouchableOpacity
+                                key={cat.id}
+                                style={[
+                                    styles.categoryChip,
+                                    { borderColor: cat.color },
+                                    selectedCategoryId === cat.id && { backgroundColor: cat.color + '20' }
+                                ]}
+                                onPress={() => setValue('category_id', cat.id)}
+                            >
+                                <CategoryIcon icon={cat.icon} size={16} color={cat.color} />
+                                <Text style={[styles.categoryText, { color: cat.color }]}>{cat.name}</Text>
+                            </TouchableOpacity>
+                        ))}
+                        {filteredCategories.length === 0 && (
+                            <Text style={styles.emptyCategories}>No hay categorías disponibles</Text>
+                        )}
+                    </View>
+                    {errors.category_id && (
+                        <Text style={styles.errorText}>{errors.category_id.message}</Text>
+                    )}
+
+                    <Button
+                        label="Registrar Transacción"
+                        onPress={handleSubmit(onSubmit)}
+                        isLoading={loading}
+                        style={styles.submitButton}
+                    />
+                </Card>
+            </ScrollView>
+
+            <CreateCategoryModal
+                visible={showCreateCategoryModal}
+                onClose={() => setShowCreateCategoryModal(false)}
+                onCreated={handleCreateCategory}
+            />
+        </>
     );
 }
 
@@ -192,11 +247,28 @@ const styles = StyleSheet.create({
     card: {
         padding: theme.spacing[20],
     },
+    categoryHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: theme.spacing[8],
+    },
     label: {
         fontSize: theme.typography.sizes.sm,
         color: theme.colors.textMuted,
-        marginBottom: theme.spacing[8],
         fontWeight: theme.typography.weights.medium,
+    },
+    addCategoryButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+    },
+    addCategoryText: {
+        fontSize: theme.typography.sizes.xs,
+        fontWeight: theme.typography.weights.medium,
+        color: theme.colors.primary,
     },
     currencySymbol: {
         fontSize: theme.typography.sizes.lg,
@@ -207,7 +279,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         flexWrap: 'wrap',
         gap: theme.spacing[8],
-        marginBottom: theme.spacing[24],
+        marginBottom: theme.spacing[12],
     },
     categoryChip: {
         flexDirection: 'row',
@@ -230,6 +302,11 @@ const styles = StyleSheet.create({
         color: theme.colors.textLight,
         textAlign: 'center',
         width: '100%',
+    },
+    errorText: {
+        fontSize: theme.typography.sizes.xs,
+        color: theme.colors.error,
+        marginBottom: theme.spacing[12],
     },
     submitButton: {
         marginTop: theme.spacing[16],

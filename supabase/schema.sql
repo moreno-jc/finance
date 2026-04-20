@@ -153,16 +153,16 @@ insert into public.categories (name, type, icon, color, is_default) values
   ('Freelance', 'income', 'briefcase-outline', '#34d399', true),
   ('Inversiones', 'income', 'trending-up-outline', '#6ee7b7', true),
   
-  ('Comida', 'expense', 'fast-food-outline', '#f59e0b', true),
-  ('Transporte', 'expense', 'car-outline', '#fbbf24', true),
-  ('Renta', 'expense', 'home-outline', '#f97316', true),
-  ('Entretenimiento', 'expense', 'game-controller-outline', '#fb923c', true),
-  ('Salud', 'expense', 'medkit-outline', '#ef4444', true),
+  (' Comida', 'expense', 'fast-food-outline', '#f59e0b', true),
+  (' Transporte', 'expense', 'car-outline', '#fbbf24', true),
+  (' Renta', 'expense', 'home-outline', '#f97316', true),
+  (' Entretenimiento', 'expense', 'game-controller-outline', '#fb923c', true),
+  (' Salud', 'expense', 'medkit-outline', '#ef4444', true),
   
-  ('Fondo Emergencia', 'saving', 'shield-checkmark-outline', '#6366f1', true),
-  ('Vacaciones', 'saving', 'airplane-outline', '#8b5cf6', true),
+  (' Fondo Emergencia', 'saving', 'shield-checkmark-outline', '#6366f1', true),
+  (' Vacaciones', 'saving', 'airplane-outline', '#8b5cf6', true),
   
-  ('Bolsa/ETFs', 'investment', 'bar-chart-outline', '#0ea5e9', true),
+  (' Bolsa/ETFs', 'investment', 'bar-chart-outline', '#0ea5e9', true),
   
-  ('Tarjeta Crédito', 'debt', 'card-outline', '#ec4899', true)
+  (' Tarjeta Crédito', 'debt', 'card-outline', '#ec4899', true)
 on conflict do nothing;

@@ -101,24 +101,6 @@ export default function DashboardScreen() {
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: theme.colors.background },
     content: { flex: 1 },
-    summaryGrid: {
-        padding: theme.spacing[16],
-    },
-    summaryCard: {
-        padding: theme.spacing[20],
-        backgroundColor: theme.colors.surface,
-        alignItems: 'center',
-    },
-    summaryLabel: {
-        fontSize: theme.typography.sizes.sm,
-        color: theme.colors.textMuted,
-        marginBottom: theme.spacing[4],
-    },
-    summaryValue: {
-        fontSize: theme.typography.sizes['3xl'],
-        fontWeight: theme.typography.weights.bold,
-        color: theme.colors.text,
-    },
     welcomeContainer: {
         padding: theme.spacing[24],
         alignItems: 'center',
