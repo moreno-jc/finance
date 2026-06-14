@@ -1,0 +1,13 @@
+{
+  "version": "1.0.0",
+  "organization": "local",
+  "technology": "finance-app",
+  "date": "June 2026",
+  "abstract": "Contexto comprimido del proyecto Finance App para uso de agentes IA. Contiene stack, esquema DB, estructura real implementada, estado de módulos y patrones del proyecto. Diseñado para mínimo consumo de tokens.",
+  "category": "project-context",
+  "lastUpdated": "2026-06-13",
+  "relatedFiles": [
+    "CORRECTIONS_LOG.md",
+    "PENDING_TASKS.md"
+  ]
+}
